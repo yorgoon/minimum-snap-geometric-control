@@ -34,4 +34,6 @@ https://link.springer.com/chapter/10.1007/978-3-319-28872-7_37
 
 Geometric tracking control of a quadrotor UAV on SE(3): 
 https://ieeexplore.ieee.org/abstract/document/5717652
+
+Control of Complex Maneuvers for a Quadrotor UAV using Geometric Methods on SE(3):
 https://arxiv.org/abs/1003.2005
