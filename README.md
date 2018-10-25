@@ -26,8 +26,12 @@ With disturbances
 [![IMAGE ALT TEXT HERE](https://img.youtube.com/vi/gG9_Etc4188/0.jpg)](https://www.youtube.com/watch?v=gG9_Etc4188)
 
 ## Related articles
-Minimum snap trajectory generation and control for quadrotors: https://ieeexplore.ieee.org/abstract/document/5980409
-Polynomial Trajectory Planning for Aggressive Quadrotor Flight in Dense Indoor Environments: https://link.springer.com/chapter/10.1007/978-3-319-28872-7_37
-Geometric tracking control of a quadrotor UAV on SE(3):
+Minimum snap trajectory generation and control for quadrotors: 
+https://ieeexplore.ieee.org/abstract/document/5980409
+
+Polynomial Trajectory Planning for Aggressive Quadrotor Flight in Dense Indoor Environments: 
+https://link.springer.com/chapter/10.1007/978-3-319-28872-7_37
+
+Geometric tracking control of a quadrotor UAV on SE(3): 
 https://ieeexplore.ieee.org/abstract/document/5717652
 https://arxiv.org/abs/1003.2005
