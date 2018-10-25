@@ -4,3 +4,6 @@ For more information, please visit https://asco.lcsr.jhu.edu/en530-678-s2018/
 
 ## Final presentation
 [slides](https://drive.google.com/open?id=1APnwKnfsYUZB0-4T4GaXExabcxmzodVf)
+
+## Time allocation
+[![IMAGE ALT TEXT HERE](https://img.youtube.com/vi/https://youtu.be/m1lIAcgYFYQ/0.jpg)](https://www.youtube.com/watch?v=https://youtu.be/m1lIAcgYFYQ)
