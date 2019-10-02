@@ -10,11 +10,11 @@ This repository contains MATLAB-based simulation of quadrotor using a geometric 
 [slides](https://drive.google.com/open?id=1APnwKnfsYUZB0-4T4GaXExabcxmzodVf), [report](https://drive.google.com/open?id=17HhCqkOnvpvw7iIP_8YxWNhx-nqY6or6)
 
 ## How To
+Please run the main script sequentially in ``mainsim.m``
 
 ## Path Planning (trajectory generation & optimization)
 
 ## Controller
-
 
 ## Time allocation
 
