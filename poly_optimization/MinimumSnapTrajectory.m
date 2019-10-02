@@ -12,12 +12,12 @@ classdef MinimumSnapTrajectory < handle
       % Constructor
       function obj = MinimumSnapTrajectory(tau_vec, path)
          if nargin == 2
-            if isnumeric(tau_vec) && size(tau_vec,2) == 1
+            if isnumeric(tau_vec) && isvector(tau_vec)
                obj.tau_vec = tau_vec;
             else
                error('tau_vec is either not numeric or not a column vector')
             end
-            if isnumeric(path) && size(path, 1) == size(tau_vec, 1)+1
+            if isnumeric(path) && size(path, 1) == length(tau_vec)+1
                 obj.path = path;
             else
                 error('path is either not numeric or the size is incorrect')
@@ -32,7 +32,7 @@ classdef MinimumSnapTrajectory < handle
          end
       end
       
-      function A = equalA(obj, tau, r)
+      function A = equalA(~, tau, r)
         %equalA constructs a matrix which maps the coefficients of the polynomial to 
         % equality constraints
         % Ax = b
@@ -74,11 +74,11 @@ classdef MinimumSnapTrajectory < handle
       
       % Permutation C
       function C = permutMat(obj)
-        K = length(obj.tau_vec);
-        C = eye(10*K);
+        m = length(obj.tau_vec);
+        C = eye(10*m);
         c = [];
         idx = [];
-        for i=1:K-1
+        for i=1:m-1
             c = [c;C(10*i+2:10*i+5,:)];
             idx = [idx, 10*i+2:10*i+5];
         end
@@ -133,12 +133,12 @@ classdef MinimumSnapTrajectory < handle
       function augQ = augmentQ(obj)
         %augmentQ constructs an augmented cost matrix
         r = 4;
-        Tau_vec = obj.tau_vec;
+%         Tau_vec = obj.tau_vec;
         n = 2*r+1;
-        K = length(Tau_vec);
-        augQ = zeros((n+1)*K);
-        for i = 1:K
-            augQ((n+1)*(i-1)+1:(n+1)*i,(n+1)*(i-1)+1:(n+1)*i) = costMat(obj, Tau_vec(i), r);
+        m = length(obj.tau_vec);
+        augQ = zeros((n+1)*m);
+        for i = 1:m
+            augQ((n+1)*(i-1)+1:(n+1)*i,(n+1)*(i-1)+1:(n+1)*i) = costMat(obj, obj.tau_vec(i), r);
         end
       end
       

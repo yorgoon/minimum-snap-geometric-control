@@ -3,7 +3,7 @@ clear;
 clc
 addpath(genpath('./'));
 
-%% Path planner
+% Path planner
 disp('Planning ...');
 % This map is used to generate path and check collision
 map_colli = load_map_inflated('maps/map3.txt', 0.5, 0.2, 0); % xy res, z res, margin
@@ -17,55 +17,62 @@ start = [5.0 -1 3.5];
 % stop  = [5.0 19.0 .5];
 stop  = [17.0 4.0 .5];
 
-% # of quadrotors. In our case, it's always 1.
-% nquad = length(start);
-% for qn = 1:nquad
-%     tic
-%     path{qn} = dijkstra(map_colli, start{qn}, stop{qn}, true);
-%     toc
-% end
-
+% Generate way points
 path = dijkstra(map_colli, start, stop, true);
 
 figure(1);
 plot_path(map, path);
-
+axis equal
+grid on
+title('Quad Simulator');xlabel('x');ylabel('y');zlabel('z');
+hold on
+plot3(start(1),start(2),start(3), '*r', 'markersize', 10)
+plot3(stop(1),stop(2),stop(3), '*g', 'markersize', 10)
+hold off
+view(3)
 %% Desired trajectory generation
 % *Warning*
 % Since demonstrated obstacles are dense, including narrow corridors, it 
 % may take up to a minute to get collision free trajectory.
 % It is highly recommended to use simpler map if you just need a
 % demonstration.
-traj_obj = desired_trajectory(map_colli, path);
+traj_obj = trajectoryGenerator(map_colli, path);
 
-%% ODE simulation
-tau_vec = traj_obj.tau_vec';
+%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%% ODE Simulation %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+tau_vec = traj_obj.tau_vec;
 path = traj_obj.path;
-
 ts = [0 cumsum(tau_vec)];
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%% Initial Condition %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % State: [x, v, pitch, roll, yaw, w]'
-% Initial condition
 x0 = [path(1,:) zeros(1,9)]';
+
 % Disturbances on the initial condition
 % x0(1:3) = x0(1:3)-[.1 .05 .15]';
 % x0(4:6) = x0(4:6)+[.01 .01 .02]';
+
 % Initial error of yaw angle must not exceed 90 degrees
 % x0(7:9) = x0(7:9)+ones(3,1)*pi/18;
 % x0(10:12) = x0(10:12) + .0;
+%%%%%%%%%%%%%%%%%%%%%%%%%%% Initial Condition %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-% Model parameters
+%%%%%%%%%%%%%%%%%%%%%%%%%%%% Model parameters %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 model_param.grav = 9.807;
 model_param.mass = 1.477;
 model_param.I = [0.01152 0 0;0 0.01152 0;0 0 0.0218];
 model_param.arm_length = 0.263;
 model_param.c_tf = 8.004e-4;
-%%
+
 % Gain
-KK.Kp = 11.9;
-KK.Kv = 4.443;
-KK.KR = 10;
-KK.K_omega = 6;
+KK.Kp = 5;
+KK.Kv = 5;
+KK.KR = 5;
+KK.K_omega = 5;
+%%%%%%%%%%%%%%%%%%%%%%%%%%%% Model parameters %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % For real time video
 target_fps = 30;
@@ -79,33 +86,30 @@ direction = [1 0 0]';
 Fmat = extForce_gen(t_sim, start_T, duration, mag, direction);
 
 % Run ode45
-options =  odeset('RelTol',1e-1,'AbsTol',1e-1);
+options =  odeset('RelTol',1e-2,'AbsTol',1e-2);
 [tsave, xsave] = quadSim(traj_obj, model_param, KK, t_sim, x0, Fmat, options);
 
 %% Desired trajectory vs actual trajectory
-desired_pos = zeros(length(tsave),3);
-desired_vel = zeros(length(tsave),3);
-desired_acc = zeros(length(tsave),3);
-desired_jerk = zeros(length(tsave),3);
-desired_yaw = zeros(length(tsave),1);
-for i = 1:length(tsave)
-    desired_s = desiredState(traj_obj, tsave(i));
-    desired_pos(i,:) = desired_s.pos';
-    desired_vel(i,:) = desired_s.vel';
-    desired_acc(i,:) = desired_s.acc';
-    desired_jerk(i,:) = desired_s.jerk';
-    desired_yaw(i) = desired_s.yaw;
-end
-%%
+% desired_pos = zeros(length(tsave),3);
+% desired_vel = zeros(length(tsave),3);
+% desired_acc = zeros(length(tsave),3);
+% desired_jerk = zeros(length(tsave),3);
+% desired_yaw = zeros(length(tsave),1);
+% for i = 1:length(tsave)
+%     desired_s = desiredState(traj_obj, tsave(i));
+%     desired_pos(i,:) = desired_s.pos';
+%     desired_vel(i,:) = desired_s.vel';
+%     desired_acc(i,:) = desired_s.acc';
+%     desired_jerk(i,:) = desired_s.jerk';
+%     desired_yaw(i) = desired_s.yaw;
+% end
+% %
 figure(1)
 % Desired trajectory
-plot3(desired_pos(:,1),desired_pos(:,2),desired_pos(:,3))
+% plot3(desired_pos(:,1),desired_pos(:,2),desired_pos(:,3))
 hold on
-grid on
-axis equal
 % Actual trajectory
 plot3(xsave(:,1),xsave(:,2),xsave(:,3),'--')
-hold off
 % legend('Desired','Actual')
 %%
 figure(5)
@@ -157,4 +161,4 @@ grid on
 figure(1);
 % plot_path(map, path{1});
 filename = 'my_video.avi';
-video_gen(tsave, xsave, filename, 200, Fmat)
+video_gen(tsave, xsave, filename, 15, Fmat)

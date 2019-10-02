@@ -60,7 +60,7 @@ for i = 1:size(map.blocks,1)
 end
 
 if size(path,1) > 0
-pcshow(path, [0,0,0],'MarkerSize', 0.1);
+% pcshow(path, [0,0,0],'MarkerSize', 0.1);
 end
 % axis([map.boundary(1)-1, map.boundary(4)-1, map.boundary(2)-1,map.boundary(5)+1,map.boundary(3)+1,map.boundary(6)+1])
 hold off;

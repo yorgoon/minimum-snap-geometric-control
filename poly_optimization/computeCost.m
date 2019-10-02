@@ -1,13 +1,5 @@
 function J = computeCost(traj_obj, gamma)
 
-% A = A_const_appA(tau_vec);
-% K = length(tau_vec);
-% C = permut_mat(K);
-% bF = const_bf(PATH);
-% Q = augmentQ(tau_vec,4);
-% R = comp_R_appA(A,C,Q);
-% b_sorted = comp_b_sorted(R, bF);
-
 tau_vec = traj_obj.tau_vec;
 
 A_yaw = augmentA_yaw(tau_vec);
