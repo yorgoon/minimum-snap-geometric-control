@@ -49,7 +49,7 @@ while count ~= 0
         J_seq = [J_seq minval];
         i = i+1;
         if i == 5
-            if ~any(abs(J_seq - J_seq(end))./J_seq(end) > .01)
+            if ~any(abs(J_seq - J_seq(end))./J_seq(end) > .001)
                 break
             end
             i = 1;
@@ -69,7 +69,7 @@ disp('Time allocation finished')
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% not working yet
 
 traj_obj = MinimumSnapTrajectory(tau_vec, path);
-
+fprintf('Number of way points: %i\n', length(path))
 % Check collision
 X_test = [];
 PATH_test = path;

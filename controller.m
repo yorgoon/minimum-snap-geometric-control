@@ -55,15 +55,15 @@ R2 = (Rd2'*R - R'*Rd2);
 
 eR1 = 1/2*vee_optr(R1);
 eR2 = 1/2*vee_optr(R2);
-if norm(eR1) >= norm(eR2)
-    Rd = Rd2;
-    eR = eR2;
-    xbd = -xbd;
-    ybd = -ybd;
-else
+% if norm(eR1) >= norm(eR2)
+%     Rd = Rd2;
+%     eR = eR2;
+%     xbd = -xbd;
+%     ybd = -ybd;
+% else
     Rd = Rd1;
     eR = eR1;
-end
+% end
 
 current_omega = current_state(10:12);
 

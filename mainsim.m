@@ -6,16 +6,16 @@ addpath(genpath('./'));
 % Path planner
 disp('Planning ...');
 % This map is used to generate path and check collision
-map_colli = load_map_inflated('maps/map3.txt', 0.5, 0.2, 0); % xy res, z res, margin
+map_colli = load_map_inflated('maps/map1_full.txt', 0.5, 0.2, 0); % xy res, z res, margin
 % This map is for visualization (without boundary obsatacles)
-map = load_map('maps/map3.txt', 0.5, 0.15, 0.34); % 3 parameters are dummy
+map = load_map('maps/map1.txt', 0.5, 0.15, 0.34); % 3 parameters are dummy
 
 % start = {[5.0 -1 3.5]};
 % stop  = {[5.0 19.0 .5]};
 
 start = [5.0 -1 3.5];
-% stop  = [5.0 19.0 .5];
-stop  = [17.0 4.0 .5];
+stop  = [5.0 19.0 .5];
+% stop  = [17.0 4.0 .5];
 
 % Generate way points
 path = dijkstra(map_colli, start, stop, true);
@@ -76,7 +76,7 @@ KK.K_omega = 5;
 
 % For real time video
 target_fps = 30;
-t_sim = 0:1/target_fps:20;
+t_sim = 0:1/target_fps:sum(tau_vec);
 
 % External force
 start_T = 0;
@@ -90,24 +90,26 @@ options =  odeset('RelTol',1e-2,'AbsTol',1e-2);
 [tsave, xsave] = quadSim(traj_obj, model_param, KK, t_sim, x0, Fmat, options);
 
 %% Desired trajectory vs actual trajectory
-% desired_pos = zeros(length(tsave),3);
-% desired_vel = zeros(length(tsave),3);
-% desired_acc = zeros(length(tsave),3);
-% desired_jerk = zeros(length(tsave),3);
-% desired_yaw = zeros(length(tsave),1);
-% for i = 1:length(tsave)
-%     desired_s = desiredState(traj_obj, tsave(i));
-%     desired_pos(i,:) = desired_s.pos';
-%     desired_vel(i,:) = desired_s.vel';
-%     desired_acc(i,:) = desired_s.acc';
-%     desired_jerk(i,:) = desired_s.jerk';
-%     desired_yaw(i) = desired_s.yaw;
-% end
-% %
+desired_pos = zeros(length(tsave),3);
+desired_vel = zeros(length(tsave),3);
+desired_acc = zeros(length(tsave),3);
+desired_jerk = zeros(length(tsave),3);
+desired_yaw = zeros(length(tsave),1);
+for i = 1:length(tsave)
+    desired_s = desiredState(traj_obj, tsave(i));
+    desired_pos(i,:) = desired_s.pos';
+    desired_vel(i,:) = desired_s.vel';
+    desired_acc(i,:) = desired_s.acc';
+    desired_jerk(i,:) = desired_s.jerk';
+    desired_yaw(i) = desired_s.yaw;
+end
+
 figure(1)
 % Desired trajectory
-% plot3(desired_pos(:,1),desired_pos(:,2),desired_pos(:,3))
+plot3(desired_pos(:,1),desired_pos(:,2),desired_pos(:,3))
 hold on
+grid on
+axis equal
 % Actual trajectory
 plot3(xsave(:,1),xsave(:,2),xsave(:,3),'--')
 % legend('Desired','Actual')
