@@ -1,4 +1,4 @@
-function [u1, u2, u3, u4] = control_sw2(current_state, desired_state, model_param, K)
+function [u1, u2, u3, u4] = controller(current_state, desired_state, model_param, K)
 
 J = model_param.I; % Moment of inertia wrt body frame
 

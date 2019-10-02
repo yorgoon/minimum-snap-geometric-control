@@ -1,4 +1,4 @@
-function sdot = uavEOM_sw(t, s, tau_vec, PATH, P, model_param, K, Fmat)
+function sdot = quadDynamics(t, state, traj_obj, model_param, K, Fmat)
 
 g = model_param.grav;
 m = model_param.mass;
@@ -6,13 +6,13 @@ J = model_param.I;
 
 sdot = zeros(12,1);
 
-sd = desired_state(tau_vec, t, PATH, P);
+desired_state = desiredState(traj_obj, t);
 
 % Thrust
 L = model_param.arm_length;
 c_tf = model_param.c_tf;
 mapping_u = [1 1 1 1;0 L 0 -L;-L 0 L 0;c_tf -c_tf c_tf -c_tf];
-[u1, u2, u3, u4] = control_sw2(s, sd, model_param,K);
+[u1, u2, u3, u4] = controller(state, desired_state, model_param, K);
 thrust = mapping_u\[u1, u2, u3, u4]';
 
 epsilon_t = 1e-4;
@@ -42,12 +42,12 @@ M = [u2 u3 u4]';
 
 
 
-R = ROTZ(s(9))*ROTX(s(7))*ROTY(s(8));
-omega = [s(10) s(11) s(12)]';
+R = ROTZ(state(9))*ROTX(state(7))*ROTY(state(8));
+omega = [state(10) state(11) state(12)]';
 
-sdot(1) = s(4);
-sdot(2) = s(5);
-sdot(3) = s(6);
+sdot(1) = state(4);
+sdot(2) = state(5);
+sdot(3) = state(6);
 
 %%%%%%%%%%%%%% Disturbance terms. Must be modified %%%%%%%%%%%%%%
 % t_dist_st = 12.5;
@@ -78,9 +78,9 @@ sdot(5) = accel(2);
 sdot(6) = accel(3);
 
 % relationship between omega & euler angles
-mapping_R = [cos(s(8)) 0 -cos(s(7))*sin(s(8));...
-             0         1            sin(s(7));...
-             sin(s(8)) 0  cos(s(7))*cos(s(8))];
+mapping_R = [cos(state(8)) 0 -cos(state(7))*sin(state(8));...
+             0         1            sin(state(7));...
+             sin(state(8)) 0  cos(state(7))*cos(state(8))];
 eulerdot = mapping_R\omega;
 sdot(7) = eulerdot(1);
 sdot(8) = eulerdot(2);

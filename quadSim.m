@@ -1,14 +1,15 @@
-function [tsave, xsave] = quad_sim(tau_vec, PATH, P, model_param, KK, t_sim, x0, Fmat, options)
+function [tsave, xsave] = quadSim(traj_obj, model_param, KK, t_sim, x0, Fmat, options)
 
 
-[tsave, xsave] = ode45(@(t,s) uavEOM_sw(t, s, tau_vec, PATH, P, model_param, KK, Fmat), t_sim, x0, options);
+
+[tsave, xsave] = ode45(@(t,s) quadDynamics(t, s, traj_obj, model_param, KK, Fmat), t_sim, x0, options);
 
 desired_pos = zeros(length(tsave),3);
 desired_vel = zeros(length(tsave),3);
 desired_acc = zeros(length(tsave),3);
 
 for i = 1:length(tsave)
-    desired_s = desired_state(tau_vec, tsave(i), PATH, P);
+    desired_s = desiredState(traj_obj, tsave(i));
     desired_pos(i,:) = desired_s.pos';
     desired_vel(i,:) = desired_s.vel';
     desired_acc(i,:) = desired_s.acc';
