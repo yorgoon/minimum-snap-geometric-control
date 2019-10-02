@@ -1,24 +1,38 @@
-function desired_state = desired_state(tau_vec, t, PATH, P)
+function desired_state = desiredState(traj_obj, t)
+%desiredState computes desired position (x,y,z), yaw and its derivatives 
+% INPUT
+% 
 
-total_time = sum(tau_vec);
-ts = [0; cumsum(tau_vec)];
-p = PATH;
-if t >= total_time
-    pos = p(end,:);
-    vel = [0;0;0];
-    acc = [0;0;0];
-    jerk = [0;0;0];
-    snap = [0;0;0];
+tau_vec = traj_obj.tau_vec';
+P = traj_obj.P;
+path = traj_obj.path;
+
+% Check dimensions
+if size(path,2) ~= size(P,2)
+    path = path';
+end
+
+cumsum_tau_vec = cumsum(tau_vec);
+ts = [0; cumsum_tau_vec(:)];
+D = size(P,2);
+
+% Declare variables
+pos = zeros(1,D);
+vel = zeros(1,D);
+acc = zeros(1,D);
+jerk = zeros(1,D);
+snap = zeros(1,D);
+
+
+% If time is out of range, return the end point of the path
+if t < 0
+    error('time has to be greater than zero.')
+elseif t >= sum(tau_vec)
+    pos = path(end,:);
 else
     k = find(ts<=t);
     k = k(end);
-    
-    pos = zeros(1,3);
-    vel = zeros(1,3);
-    acc = zeros(1,3);
-    jerk = zeros(1,3);
-    snap = zeros(1,3);
-    for m = 1:size(p,2)
+    for m = 1:D
         tau = t-ts(k);
         pos(m) = [tau^9,tau^8,tau^7,tau^6,tau^5,tau^4,tau^3,tau^2,tau,1] * P(10*k:-1:10*(k-1)+1,m);
         vel(m) = [9*tau^8,8*tau^7,7*tau^6,6*tau^5,5*tau^4,4*tau^3,3*tau^2,2*tau,1,0] * P(10*k:-1:10*(k-1)+1,m);
@@ -33,6 +47,7 @@ else
     end
 end
 
+% Desired yaw and its derivatives are all zero.
 yaw = 0;
 yawdot = 0;
 yawddot = 0;

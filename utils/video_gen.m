@@ -5,7 +5,7 @@ fig = figure(1);
 hold on
 Q = FramePlot(tsave(1), xsave(1,:), Fmat(1,2:4), fv);
 % axis([0 10.5 -1.5 20 0 7])
-axis([-3 2.5 -1.5 1.5 -1.5 1.5])
+% axis([-3 2.5 -1.5 1.5 -1.5 1.5])
 set(gcf,'Renderer','OpenGL')
 v = VideoWriter(filename);
 v.FrameRate = target_fps;

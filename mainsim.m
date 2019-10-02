@@ -6,57 +6,47 @@ addpath(genpath('./'));
 %% Path planner
 disp('Planning ...');
 % This map is used to generate path and check collision
-map_colli = load_map_inflated('maps/map1_full.txt', 0.5, 0.2, 0); % xy res, z res, margin
+map_colli = load_map_inflated('maps/map3.txt', 0.5, 0.2, 0); % xy res, z res, margin
 % This map is for visualization (without boundary obsatacles)
-map = load_map('maps/map1.txt', 0.5, 0.15, 0.34); % 3 parameters are dummy
+map = load_map('maps/map3.txt', 0.5, 0.15, 0.34); % 3 parameters are dummy
 
-start = {[5.0 -1 3.5]};
-stop  = {[5.0 19.0 .5]};
+% start = {[5.0 -1 3.5]};
+% stop  = {[5.0 19.0 .5]};
+
+start = [5.0 -1 3.5];
+% stop  = [5.0 19.0 .5];
+stop  = [17.0 4.0 .5];
 
 % # of quadrotors. In our case, it's always 1.
-nquad = length(start);
-for qn = 1:nquad
-    tic
-    path{qn} = dijkstra(map_colli, start{qn}, stop{qn}, true);
-    toc
-end
+% nquad = length(start);
+% for qn = 1:nquad
+%     tic
+%     path{qn} = dijkstra(map_colli, start{qn}, stop{qn}, true);
+%     toc
+% end
 
-if nquad == 1
-    figure(1);
-    plot_path(map, path{1});
-end
-%% Spiral trajectory
-a = 1;
-c = .50;
-t = linspace(0,10*pi,15);
+path = dijkstra(map_colli, start, stop, true);
 
-y = a*sin(t);
-z = a*cos(t);
-x = t/(2*pi*c);
+figure(1);
+plot_path(map, path);
 
-path = [x' y' z'];
-path = [[-3 0 1];path;[13 0 1]];
-figure(1)
-plot3(path(:,1), path(:,2), path(:,3)); 
-xlabel('x'); ylabel('y'); title('Circula helix');
-axis equal
-% pbaspect([1 1 1])
-axis([-3 14 -1.5 1.5 -1.5 1.5])
-grid on
 %% Desired trajectory generation
 % *Warning*
 % Since demonstrated obstacles are dense, including narrow corridors, it 
 % may take up to a minute to get collision free trajectory.
 % It is highly recommended to use simpler map if you just need a
 % demonstration.
-[PATH, P, tau_vec] = desired_trajectory(map_colli, path);
+traj_obj = desired_trajectory(map_colli, path);
 
 %% ODE simulation
+tau_vec = traj_obj.tau_vec';
+path = traj_obj.path;
+
 ts = [0 cumsum(tau_vec)];
 
 % State: [x, v, pitch, roll, yaw, w]'
 % Initial condition
-x0 = [PATH(1,:) zeros(1,9)]';
+x0 = [path(1,:) zeros(1,9)]';
 % Disturbances on the initial condition
 % x0(1:3) = x0(1:3)-[.1 .05 .15]';
 % x0(4:6) = x0(4:6)+[.01 .01 .02]';
@@ -72,14 +62,14 @@ model_param.arm_length = 0.263;
 model_param.c_tf = 8.004e-4;
 %%
 % Gain
-KK.Kp = 2500;%11.9;
-KK.Kv = 750;%4.443;
-KK.KR = 15000;%10;
-KK.K_omega = 7300;%6;
+KK.Kp = 11.9;
+KK.Kv = 4.443;
+KK.KR = 10;
+KK.K_omega = 6;
 
 % For real time video
-target_fps = 2000;
-t_sim = 0:1/target_fps:2;
+target_fps = 30;
+t_sim = 0:1/target_fps:20;
 
 % External force
 start_T = 0;
@@ -90,7 +80,7 @@ Fmat = extForce_gen(t_sim, start_T, duration, mag, direction);
 
 % Run ode45
 options =  odeset('RelTol',1e-1,'AbsTol',1e-1);
-[tsave, xsave] = quad_sim(tau_vec, PATH, P, model_param, KK, t_sim, x0, Fmat, options);
+[tsave, xsave] = quadSim(traj_obj, model_param, KK, t_sim, x0, Fmat, options);
 
 %% Desired trajectory vs actual trajectory
 desired_pos = zeros(length(tsave),3);
@@ -99,7 +89,7 @@ desired_acc = zeros(length(tsave),3);
 desired_jerk = zeros(length(tsave),3);
 desired_yaw = zeros(length(tsave),1);
 for i = 1:length(tsave)
-    desired_s = desired_state(tau_vec, tsave(i), PATH, P);
+    desired_s = desiredState(traj_obj, tsave(i));
     desired_pos(i,:) = desired_s.pos';
     desired_vel(i,:) = desired_s.vel';
     desired_acc(i,:) = desired_s.acc';
@@ -166,5 +156,5 @@ grid on
 %% Video generator
 figure(1);
 % plot_path(map, path{1});
-filename = 'myVideo_helix_1000_6.avi';
+filename = 'my_video.avi';
 video_gen(tsave, xsave, filename, 200, Fmat)
